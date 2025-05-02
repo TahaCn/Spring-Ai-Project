@@ -1,0 +1,45 @@
+import React, { useState }from "react";
+
+function ImageGenerator() {
+  const [prompt, setPrompt] = useState("");
+  const [imageUrls, setImageUrls] = useState([]);
+  const generateImage = async () => {
+    try {
+      const response = await fetch(`http://localhost:8081/generate-image?prompt=${prompt}`);
+      const urls = await response.json();
+      
+      // Check if the response is valid and an array
+      if (Array.isArray(urls)) {
+        setImageUrls(urls);  // If it's an array, set it
+      } else {
+        setImageUrls([]);  // Otherwise, set it to an empty array to avoid issues
+      }
+    } catch (error) {
+      console.error("Error generating image:", error);
+      setImageUrls([]);  // If there is an error, reset to an empty array
+    }
+  };
+  return(
+        <div className="tab-content">
+              <h2>Generate Image</h2>
+              <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Enter prompt for image."
+              />
+              <button onClick={generateImage}>Generate Image</button>
+
+              <div className="image-grid">
+                 {(Array.isArray(imageUrls) ? imageUrls : []).map((url, index) => (
+                  <img key={index} src={url} alt={`Generated ${index}`} />
+                 ))}
+                 {[...Array(4 - imageUrls.length)].map((_, index) => (
+                  <div key={index + imageUrls.length} className="empty-image-slot"></div>
+                 ))}
+              </div>
+        </div>
+    );
+}
+
+export default ImageGenerator;
